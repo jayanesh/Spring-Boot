@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,5 +39,16 @@ public class CampController {
     @GetMapping("/{campId}")
     public Camp findById(@PathVariable Long campId) {
         return campService.findById(campId);
+    }
+
+    @PutMapping("/{campId}")
+    public Camp update(@PathVariable Long campId, @RequestBody Camp camp) {
+        return campService.update(campId, camp);
+    }
+
+    @DeleteMapping("/{campId}")
+    public ResponseEntity<Void> delete(@PathVariable Long campId) {
+        campService.delete(campId);
+        return ResponseEntity.noContent().build();
     }
 }

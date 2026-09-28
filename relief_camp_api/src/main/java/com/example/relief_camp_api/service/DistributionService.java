@@ -61,4 +61,39 @@ public class DistributionService {
         campService.findById(campId);
         return distributionRepository.findBySupplyCampId(campId);
     }
+
+    public Distribution findById(Long distributionId) {
+        return distributionRepository.findById(distributionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Distribution not found"));
+    }
+
+    @Transactional
+    public Distribution update(Long distributionId, Distribution updatedDistribution) {
+        if (updatedDistribution.getQuantity() < 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be at least 1");
+        }
+
+        Distribution distribution = findById(distributionId);
+        int stockChange = distribution.getQuantity() - updatedDistribution.getQuantity();
+        int updatedStock = distribution.getSupply().getQuantity() + stockChange;
+        if (updatedStock < 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Not enough supply in camp inventory for this distribution quantity");
+        }
+
+        Supply supply = distribution.getSupply();
+        supply.setQuantity(updatedStock);
+        supplyService.save(supply);
+        distribution.setQuantity(updatedDistribution.getQuantity());
+        return distributionRepository.save(distribution);
+    }
+
+    @Transactional
+    public void delete(Long distributionId) {
+        Distribution distribution = findById(distributionId);
+        Supply supply = distribution.getSupply();
+        supply.setQuantity(supply.getQuantity() + distribution.getQuantity());
+        supplyService.save(supply);
+        distributionRepository.delete(distribution);
+    }
 }

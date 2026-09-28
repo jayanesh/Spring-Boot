@@ -12,4 +12,6 @@ public interface SupplyRepository extends JpaRepository<Supply, Long> {
     List<Supply> findByCampId(Long campId);
 
     Optional<Supply> findByCampIdAndType(Long campId, SupplyType type);
+
+    boolean existsByCampId(Long campId);
 }
